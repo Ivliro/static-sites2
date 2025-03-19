@@ -32,12 +32,12 @@ class TestHTMLNode(unittest.TestCase):
                          ' class="test"')
 
     def test_leaf_to_html_p(self):
-        node = LeafNode("p", "This is a test", None, {"class": "test"})
+        node = LeafNode("p", "This is a test", {"class": "test"})
         self.assertEqual(node.to_html(),
                          '<p class="test">This is a test</p>')
         
     def test_leaf_to_html_a(self):
-        node = LeafNode("a", "This is a test", None, {"class": "test", "href": "https://boot.dev"})
+        node = LeafNode("a", "This is a test", {"class": "test", "href": "https://boot.dev"})
         self.assertEqual(node.to_html(),
                          '<a class="test" href="https://boot.dev">This is a test</a>')
 
