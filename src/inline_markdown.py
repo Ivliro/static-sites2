@@ -77,3 +77,139 @@ def extract_links(text):
     matches = re.findall(pattern, text)
     
     return matches
+
+def split_nodes_image(old_nodes):
+    """
+    Split TextNodes that have TextType.TEXT based on markdown image syntax.
+    
+    Args:
+        old_nodes (list): List of TextNode objects
+        
+    Returns:
+        list: New list of TextNode objects with images extracted as IMAGE type nodes
+    """
+    new_nodes = []
+    
+    for old_node in old_nodes:
+        # Only process TEXT type nodes
+        if old_node.text_type != TextType.TEXT:
+            new_nodes.append(old_node)
+            continue
+        
+        text = old_node.text
+        
+        # Extract all image matches
+        image_matches = extract_images(text)
+        
+        # If no images found, keep the node as is
+        if not image_matches:
+            new_nodes.append(old_node)
+            continue
+        
+        # Process the text by replacing image markers with placeholders
+        # and then splitting on those placeholders
+        current_text = text
+        segments = []
+        
+        for i, (alt_text, image_url) in enumerate(image_matches):
+            # Create a unique placeholder for this image
+            placeholder = f"__IMAGE_PLACEHOLDER_{i}__"
+            
+            # Find the image markdown
+            image_markdown = f"![{alt_text}]({image_url})"
+            
+            # Split at the current image
+            parts = current_text.split(image_markdown, 1)
+            
+            if len(parts) < 2:  # This shouldn't happen if extract_markdown_images worked correctly
+                continue
+                
+            # Save the text before the image
+            if parts[0]:
+                segments.append((parts[0], None, None))
+                
+            # Save the image data
+            segments.append((alt_text, TextType.IMAGE, image_url))
+            
+            # Continue with the remaining text
+            current_text = parts[1]
+        
+        # Add any remaining text
+        if current_text:
+            segments.append((current_text, None, None))
+        
+        # Create TextNodes from segments
+        for text, text_type, url in segments:
+            if text_type is None:
+                new_nodes.append(TextNode(text, TextType.TEXT))
+            else:
+                new_nodes.append(TextNode(text, text_type, url))
+    
+    return new_nodes
+
+
+def split_nodes_link(old_nodes):
+    """
+    Split TextNodes that have TextType.TEXT based on markdown link syntax.
+    
+    Args:
+        old_nodes (list): List of TextNode objects
+        
+    Returns:
+        list: New list of TextNode objects with links extracted as LINK type nodes
+    """
+    new_nodes = []
+    
+    for old_node in old_nodes:
+        # Only process TEXT type nodes
+        if old_node.text_type != TextType.TEXT:
+            new_nodes.append(old_node)
+            continue
+        
+        text = old_node.text
+        
+        # Extract all link matches
+        link_matches = extract_links(text)
+        
+        # If no links found, keep the node as is
+        if not link_matches:
+            new_nodes.append(old_node)
+            continue
+        
+        # Process the text by replacing link markers with placeholders
+        # and then splitting on those placeholders
+        current_text = text
+        segments = []
+        
+        for i, (anchor_text, url) in enumerate(link_matches):
+            # Find the link markdown
+            link_markdown = f"[{anchor_text}]({url})"
+            
+            # Split at the current link
+            parts = current_text.split(link_markdown, 1)
+            
+            if len(parts) < 2:  # This shouldn't happen if extract_markdown_links worked correctly
+                continue
+                
+            # Save the text before the link
+            if parts[0]:
+                segments.append((parts[0], None, None))
+                
+            # Save the link data
+            segments.append((anchor_text, TextType.LINK, url))
+            
+            # Continue with the remaining text
+            current_text = parts[1]
+        
+        # Add any remaining text
+        if current_text:
+            segments.append((current_text, None, None))
+        
+        # Create TextNodes from segments
+        for text, text_type, url in segments:
+            if text_type is None:
+                new_nodes.append(TextNode(text, TextType.TEXT))
+            else:
+                new_nodes.append(TextNode(text, text_type, url))
+    
+    return new_nodes
