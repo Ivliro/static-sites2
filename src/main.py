@@ -11,7 +11,7 @@ def main():
 
     copy_directory_recursive('./static/','./docs/')
     print("Generating pages...")
-    generate_pages_recursive('./content','./template.html',basepath)
+    generate_pages_recursive('./content','./template.html','./docs',basepath)
 
 def copy_directory_recursive(source_dir, dest_dir):
     # Check if source directory exists
