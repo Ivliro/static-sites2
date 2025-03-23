@@ -3,12 +3,15 @@ from gencontent import generate_pages_recursive
 
 import os
 import shutil
+import sys
+
+basepath = sys.argv[1] if len(sys.argv) > 1 else '/'
 
 def main():
 
-    copy_directory_recursive('./static/','./public/')
-    print("Generating page...")
-    generate_pages_recursive('./content','./template.html','./public')
+    copy_directory_recursive('./static/','./docs/')
+    print("Generating pages...")
+    generate_pages_recursive('./content','./template.html',basepath)
 
 def copy_directory_recursive(source_dir, dest_dir):
     # Check if source directory exists

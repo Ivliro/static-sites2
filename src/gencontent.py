@@ -1,8 +1,9 @@
 import os
 from markdown_blocks import markdown_to_html_node
+from pathlib import Path
 
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath):
     print(f"Crawling directory: {dir_path_content}")
     
     # Check if the content directory exists
@@ -32,7 +33,7 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
             nested_dest_dir = os.path.join(dest_dir_path, item)
             
             # Recursively process the subdirectory
-            generate_pages_recursive(source_path, template_path, nested_dest_dir)
+            generate_pages_recursive(source_path, template_path, nested_dest_dir, basepath)
         
         # If item is a markdown file, generate an HTML page
         elif item.endswith('.md'):
@@ -42,12 +43,12 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
             
             # Generate the HTML page
             try:
-                generate_page(source_path, template_path, dest_path)
+                generate_page(source_path, template_path, dest_path, basepath)
             except Exception as e:
                 print(f"Error generating page from {source_path}: {str(e)}")
 
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, basepath):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
     
     # Read the markdown file
@@ -67,7 +68,7 @@ def generate_page(from_path, template_path, dest_path):
     
     # Replace placeholders in the template
     full_html = template_content.replace("{{ Title }}", title).replace("{{ Content }}", html_content)
-    
+    full_html = full_html.replace('href=\"/', f'href=\"{basepath}').replace('src=\"/', f'src=\"{basepath}')
     # Ensure the destination directory exists
     dest_dir = os.path.dirname(dest_path)
     if not os.path.exists(dest_dir):
