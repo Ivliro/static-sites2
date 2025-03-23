@@ -1,4 +1,5 @@
 from textnode import TextNode, TextType
+from gencontent import generate_page
 
 import os
 import shutil
@@ -6,6 +7,12 @@ import shutil
 def main():
 
     copy_directory_recursive('./static/','./public/')
+    print("Generating page...")
+    generate_page(
+        os.path.join('./content', "index.md"),
+        './template.html',
+        os.path.join('./public', "index.html"),
+    )
 
 def copy_directory_recursive(source_dir, dest_dir):
     # Check if source directory exists
@@ -40,5 +47,7 @@ def copy_directory_recursive(source_dir, dest_dir):
             copy_directory_recursive(source_path, dest_path)
     
     print(f"Finished copying directory: {source_dir} -> {dest_dir}")
+
+
 
 main()
